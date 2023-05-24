@@ -1,15 +1,21 @@
-// = 006 ======================================================================
-// MeshLambertMaterial と DirectionalLight の組み合わせは、光の表現方法としては
-// 拡散光と呼ばれます。拡散光は文字通り、物体に光が当たって拡散する様子を意味し
-// た言葉です。
-// MeshLambertMaterial はこの拡散光を表現できるマテリアルですが、three.js にはそ
-// の他にもいくつかマテリアルが用意されています。ここでは MeshPhongMaterial を利
-// 用して「反射光」と「環境光」を表現してみましょう。
+// = 007 ======================================================================
+// three.js にはたくさんの組み込みジオメトリがあります。
+// これまでのサンプルでは一貫してボックスばかり使っていましたが、代表的なその他
+// のジオメトリについてもここで試してみましょう。
+// 引数がそれぞれどういった意味を持っているのか疑問に思ったときは、公式のドキュ
+// メント等を参考にしましょう。
+// three.js docs - https://threejs.org/docs/index.html
+//
+// ちなみに、ここでは「マテリアルについては同じものを使いまわしている」という点
+// も地味に重要です。個別に色や質感を変えたい場合は、もちろん別々のマテリアルを
+// 使っても問題はありませんが、同じ質感であればマテリアルは再利用することで無駄
+// なくプログラムを組むことができますし、メモリなども節約できます。
+// ※逆に質感を変えたい場合はマテリアルは使い回すのではなく複数用意します
 // ============================================================================
 
 // 必要なモジュールを読み込み
 import * as THREE from '../../lib/three.module.js'
-import { OrbitControls } from '../../lib/OrbitControls.js' //
+import { OrbitControls } from '../../lib/OrbitControls.js'
 
 // DOM がパースされたことを検出するイベントを設定
 window.addEventListener('DOMContentLoaded', () => {
@@ -66,7 +72,7 @@ class App3 {
   }
 
   /**
-   * アンビエントライト定義のための定数 @@@
+   * アンビエントライト定義のための定数
    */
   static get AMBIENT_LIGHT_PARAM () {
     return {
@@ -89,23 +95,29 @@ class App3 {
    * @constructor
    */
   constructor () {
-    this.renderer // レンダラ
-    this.scene    // シーン
-    this.camera   // カメラ
+    this.renderer         // レンダラ
+    this.scene            // シーン
+    this.camera           // カメラ
     this.directionalLight // ディレクショナルライト
-    this.ambientLight     // アンビエントライト @@@
-    this.geometry // ジオメトリ
-    this.material // マテリアル
-    this.box      // ボックスメッシュ
-    this.controls // オービットコントロール
-    this.axesHelper // 軸ヘルパー
+    this.ambientLight     // アンビエントライト
+    this.material         // マテリアル
+    this.boxGeometry      // ボックスジオメトリ
+    this.box              // ボックスメッシュ
+    this.sphereGeometry   // スフィアジオメトリ
+    this.sphere           // スフィアメッシュ
+    this.torusGeometry    // トーラスジオメトリ
+    this.torus            // トーラスメッシュ
+    this.coneGeometry     // コーンジオメトリ
+    this.cone             // コーンメッシュ
+    this.controls         // オービットコントロール
+    this.axesHelper       // 軸ヘルパー
 
-    this.isDown = false // キーの押下状態を保持するフラグ @@@
+    this.isDown = false // キーの押下状態を保持するフラグ
 
     // render メソッドはブラウザ制御で再帰的に呼び出されるので this を固定する
     this.render = this.render.bind(this)
 
-    // キーの押下や離す操作を検出できるようにする @@@
+    // キーの押下や離す操作を検出できるようにする
     window.addEventListener('keydown', (keyEvent) => {
       // スペースキーが押されている場合はフラグを立てる
       switch (keyEvent.key) {
@@ -161,7 +173,7 @@ class App3 {
     )
     this.scene.add(this.directionalLight)
 
-    // アンビエントライト（環境光） @@@
+    // アンビエントライト（環境光）
     this.ambientLight = new THREE.AmbientLight(
       App3.AMBIENT_LIGHT_PARAM.color,
       App3.AMBIENT_LIGHT_PARAM.intensity,
@@ -171,7 +183,7 @@ class App3 {
     // ジオメトリ
     this.geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0)
 
-    // マテリアル @@@
+    // マテリアル
     // - 反射光を表現できるマテリアル -----------------------------------------
     // MeshLambertMaterial は拡散光を表現できますが、MeshPhongMaterial を利用す
     // ると拡散光に加えて反射光を表現することができます。
@@ -181,9 +193,25 @@ class App3 {
     // ------------------------------------------------------------------------
     this.material = new THREE.MeshPhongMaterial(App3.MATERIAL_PARAM)
 
-    // メッシュ
-    this.box = new THREE.Mesh(this.geometry, this.material)
+    // 各種ジオメトリからメッシュを生成する
+    this.boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0)
+    this.box = new THREE.Mesh(this.boxGeometry, this.material)
     this.scene.add(this.box)
+    this.sphereGeometry = new THREE.SphereGeometry(0.5, 16, 16)
+    this.sphere = new THREE.Mesh(this.sphereGeometry, this.material)
+    this.scene.add(this.sphere)
+    this.torusGeometry = new THREE.TorusGeometry(0.5, 0.2, 8, 16)
+    this.torus = new THREE.Mesh(this.torusGeometry, this.material)
+    this.scene.add(this.torus)
+    this.coneGeometry = new THREE.ConeGeometry(0.5, 1.0, 16)
+    this.cone = new THREE.Mesh(this.coneGeometry, this.material)
+    this.scene.add(this.cone)
+
+    // 各種メッシュは少しずつ動かしておく
+    this.box.position.set(-1.0, 1.0, 0.0)
+    this.sphere.position.set(1.0, 1.0, 0.0)
+    this.torus.position.set(-1.0, -1.0, 0.0)
+    this.cone.position.set(1.0, -1.0, 0.0)
 
     // コントロール
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
@@ -208,7 +236,7 @@ class App3 {
     // コントロールを更新
     this.controls.update()
 
-    // フラグに応じてオブジェクトの状態を変化させる @@@
+    // フラグに応じてオブジェクトの状態を変化させる
     if (this.isDown === true) {
       // rotation プロパティは Euler（オイラー）クラスのインスタンス
       // XYZ の各軸に対する回転をラジアンで指定する
@@ -218,6 +246,9 @@ class App3 {
       // このクラスに属するインスタンスは皆rotationなどの便利なプロパティを持つ
       // メッシュやカメラは、いずれもObject3Dを継承している
       this.box.rotation.y += 0.05
+      this.sphere.rotation.y += 0.05
+      this.torus.rotation.y += 0.05
+      this.cone.rotation.y += 0.05
     }
 
     // レンダラーで描画
