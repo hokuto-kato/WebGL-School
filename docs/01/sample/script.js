@@ -1,11 +1,10 @@
-// = 005 ======================================================================
-// オブジェクトに光を当て、より立体感を出すためにライトを導入しましょう。
-// three.js を用いる場合はライトはオブジェクトとしてシーンに追加します。つまり、
-// three.js ではオブジェクトを照らすライトについても、これまでに登場した様々なオ
-// ブジェクトと同じように「シーンに追加する」という手順で扱えばいいのですね。
-// 3D の世界では、ライトには様々な種類（分類）があります。
-// まずは最もポピュラーなライトである平行光源のライトをシーンに追加し、オブジェ
-// クトがより立体的に見えるようにしてみましょう。
+// = 006 ======================================================================
+// MeshLambertMaterial と DirectionalLight の組み合わせは、光の表現方法としては
+// 拡散光と呼ばれます。拡散光は文字通り、物体に光が当たって拡散する様子を意味し
+// た言葉です。
+// MeshLambertMaterial はこの拡散光を表現できるマテリアルですが、three.js にはそ
+// の他にもいくつかマテリアルが用意されています。ここでは MeshPhongMaterial を利
+// 用して「反射光」と「環境光」を表現してみましょう。
 // ============================================================================
 
 // 必要なモジュールを読み込み
@@ -54,7 +53,7 @@ class App3 {
   }
 
   /**
-   * 平行光源定義のための定数 @@@
+   * ディレクショナルライト定義のための定数
    */
   static get DIRECTIONAL_LIGHT_PARAM () {
     return {
@@ -63,6 +62,16 @@ class App3 {
       x: 1.0,          // 光の向きを表すベクトルの X 要素
       y: 1.0,          // 光の向きを表すベクトルの Y 要素
       z: 1.0           // 光の向きを表すベクトルの Z 要素
+    }
+  }
+
+  /**
+   * アンビエントライト定義のための定数 @@@
+   */
+  static get AMBIENT_LIGHT_PARAM () {
+    return {
+      color: 0xffffff, // 光の色
+      intensity: 0.2,  // 光の強度
     }
   }
 
@@ -83,6 +92,8 @@ class App3 {
     this.renderer // レンダラ
     this.scene    // シーン
     this.camera   // カメラ
+    this.directionalLight // ディレクショナルライト
+    this.ambientLight     // アンビエントライト @@@
     this.geometry // ジオメトリ
     this.material // マテリアル
     this.box      // ボックスメッシュ
@@ -138,7 +149,7 @@ class App3 {
     )
     this.camera.lookAt(App3.CAMERA_PARAM.lookAt)
 
-    // ライト（平行光源） @@@
+    // ディレクショナルライト（平行光源）
     this.directionalLight = new THREE.DirectionalLight(
       App3.DIRECTIONAL_LIGHT_PARAM.color,
       App3.DIRECTIONAL_LIGHT_PARAM.intensity
@@ -150,21 +161,25 @@ class App3 {
     )
     this.scene.add(this.directionalLight)
 
+    // アンビエントライト（環境光） @@@
+    this.ambientLight = new THREE.AmbientLight(
+      App3.AMBIENT_LIGHT_PARAM.color,
+      App3.AMBIENT_LIGHT_PARAM.intensity,
+    )
+    this.scene.add(this.ambientLight)
+
     // ジオメトリ
     this.geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0)
 
     // マテリアル @@@
-    // - ライトを有効にするためにマテリアルを変更する -------------------------
-    // ライトというと照らす側の光源のことばかり考えてしまいがちですが、その光を
-    // 受け取る側の準備も必要です。
-    // 具体的には、メッシュに適用するマテリアルをライトを受けることができるタイ
-    // プに変更します。いくつかある対応するマテリアルのうち、今回はまずランバー
-    // トマテリアルを選択します。
-    // three.js には、ライトの影響を受けるマテリアルと、そうでないマテリアルがあ
-    // ります。以前までのサンプルで利用していた MeshBasicMaterial は、ライトの影
-    // 響を受けないマテリアルです。（基本的にベタ塗りになる）
+    // - 反射光を表現できるマテリアル -----------------------------------------
+    // MeshLambertMaterial は拡散光を表現できますが、MeshPhongMaterial を利用す
+    // ると拡散光に加えて反射光を表現することができます。
+    // 反射光の外見上の特徴としては、拡散光よりもより強いハイライトが入ります。
+    // また、視点（カメラ）の位置によって見え方に変化が表れるのも拡散光には見ら
+    // れない反射光ならではの現象です。
     // ------------------------------------------------------------------------
-    this.material = new THREE.MeshLambertMaterial(App3.MATERIAL_PARAM)
+    this.material = new THREE.MeshPhongMaterial(App3.MATERIAL_PARAM)
 
     // メッシュ
     this.box = new THREE.Mesh(this.geometry, this.material)
