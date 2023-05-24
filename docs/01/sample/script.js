@@ -1,13 +1,11 @@
-// = 004 ======================================================================
-// three.js には Object3D というクラスが存在します。
-// three.js を理解する上で、この Object3D は非常に重要なオブジェクトです。
-// https://threejs.org/docs/#api/en/core/Object3D
-//
-// このオブジェクトを継承しているあらゆるオブジェクトは、position や rotation と
-// いったプロパティを持っており、位置を動かしたり回転したり、といった基本的な 3D
-// での操作を行うことができます。（それ以外にも様々な機能を持ちます）
-// ここでは、スペースキーが押されている間だけ rotation を変化させるような処理を
-// 行い、オブジェクトを回転させてみましょう。
+// = 005 ======================================================================
+// オブジェクトに光を当て、より立体感を出すためにライトを導入しましょう。
+// three.js を用いる場合はライトはオブジェクトとしてシーンに追加します。つまり、
+// three.js ではオブジェクトを照らすライトについても、これまでに登場した様々なオ
+// ブジェクトと同じように「シーンに追加する」という手順で扱えばいいのですね。
+// 3D の世界では、ライトには様々な種類（分類）があります。
+// まずは最もポピュラーなライトである平行光源のライトをシーンに追加し、オブジェ
+// クトがより立体的に見えるようにしてみましょう。
 // ============================================================================
 
 // 必要なモジュールを読み込み
@@ -52,6 +50,19 @@ class App3 {
       clearColor: 0x0b0114,
       width: window.innerWidth,
       height: window.innerHeight,
+    }
+  }
+
+  /**
+   * 平行光源定義のための定数 @@@
+   */
+  static get DIRECTIONAL_LIGHT_PARAM () {
+    return {
+      color: 0xffffff, // 光の色
+      intensity: 1.0,  // 光の強度
+      x: 1.0,          // 光の向きを表すベクトルの X 要素
+      y: 1.0,          // 光の向きを表すベクトルの Y 要素
+      z: 1.0           // 光の向きを表すベクトルの Z 要素
     }
   }
 
@@ -127,9 +138,33 @@ class App3 {
     )
     this.camera.lookAt(App3.CAMERA_PARAM.lookAt)
 
-    // ジオメトリとマテリアル
+    // ライト（平行光源） @@@
+    this.directionalLight = new THREE.DirectionalLight(
+      App3.DIRECTIONAL_LIGHT_PARAM.color,
+      App3.DIRECTIONAL_LIGHT_PARAM.intensity
+    )
+    this.directionalLight.position.set(
+      App3.DIRECTIONAL_LIGHT_PARAM.x,
+      App3.DIRECTIONAL_LIGHT_PARAM.y,
+      App3.DIRECTIONAL_LIGHT_PARAM.z,
+    )
+    this.scene.add(this.directionalLight)
+
+    // ジオメトリ
     this.geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0)
-    this.material = new THREE.MeshBasicMaterial(App3.MATERIAL_PARAM)
+
+    // マテリアル @@@
+    // - ライトを有効にするためにマテリアルを変更する -------------------------
+    // ライトというと照らす側の光源のことばかり考えてしまいがちですが、その光を
+    // 受け取る側の準備も必要です。
+    // 具体的には、メッシュに適用するマテリアルをライトを受けることができるタイ
+    // プに変更します。いくつかある対応するマテリアルのうち、今回はまずランバー
+    // トマテリアルを選択します。
+    // three.js には、ライトの影響を受けるマテリアルと、そうでないマテリアルがあ
+    // ります。以前までのサンプルで利用していた MeshBasicMaterial は、ライトの影
+    // 響を受けないマテリアルです。（基本的にベタ塗りになる）
+    // ------------------------------------------------------------------------
+    this.material = new THREE.MeshLambertMaterial(App3.MATERIAL_PARAM)
 
     // メッシュ
     this.box = new THREE.Mesh(this.geometry, this.material)
