@@ -1,13 +1,11 @@
-// = 008 ======================================================================
-// このサンプルの実行結果の見た目は、ほとんど 007 と同じです。
-// コードにコメントを大量に追記していますので、各種パラメータのそれぞれが、どう
-// いったことに影響を及ぼすのか、あるいはどういった意味合いを持つのか、しっかり
-// とここで再確認しておきましょう。
-// 講義スライドのなかにある図式も一緒に眺めながら理解を深めるといいでしょう。
-// また、それらのパラメータの意味を踏まえながら、スクリーンのサイズが変更となっ
-// たとき、どのように処理すればいいのかについても考えてみましょう。
-// このサンプルでは、万が一ウィンドウのサイズが変化しても大丈夫なように、リサイ
-// ズイベントを設定しています。
+// = 009 ======================================================================
+// これまでのサンプルでは、メッシュは「１つのジオメトリから１つ」ずつ生成してい
+// ましたが、実際の案件では、同じジオメトリを再利用しながら「複数のメッシュ」を
+// 生成する場面のほうが多いかもしれません。
+// このとき、3D シーンに複数のオブジェクトを追加する際にやってしまいがちな間違い
+// として「ジオメトリやマテリアルも複数回生成してしまう」というものがあります。
+// メモリ効率よく複数のオブジェクトをシーンに追加する方法をしっかりおさえておき
+// ましょう。
 // ============================================================================
 
 // 必要なモジュールを読み込み
@@ -137,15 +135,7 @@ class App3 {
       this.isDown = false
     }, false)
 
-    // リサイズイベント @@@
-    // - ウィンドウサイズの変更に対応 -----------------------------------------
-    // JavaScript ではブラウザウィンドウの大きさが変わったときに resize イベント
-    // が発生します。three.js や WebGL のプログラムを書く際はウィンドウや canvas
-    // の大きさが変化したときは、カメラやレンダラーなどの各種オブジェクトに対し
-    // てもこの変更内容を反映してやる必要があります。
-    // three.js の場合であれば、レンダラーとカメラに対し、以下のように設定してや
-    // ればよいでしょう。
-    // ------------------------------------------------------------------------
+    // リサイズイベント
     // ()=>{} 定義された瞬間のthisで固定される
     window.addEventListener('resize', () => {
       // レンダラの大きさを設定
@@ -156,7 +146,7 @@ class App3 {
       // ※なぜ行列の更新が必要なのかについてはネイティブなWebGLで
       // 実装する際などにもう少し詳しく解説します
       this.camera.updateProjectionMatrix()
-    })
+    }, false)
   }
 
   /**
@@ -219,25 +209,22 @@ class App3 {
     // ------------------------------------------------------------------------
     this.material = new THREE.MeshPhongMaterial(App3.MATERIAL_PARAM)
 
-    // 各種ジオメトリからメッシュを生成する
-    this.boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0)
-    this.box = new THREE.Mesh(this.boxGeometry, this.material)
-    this.scene.add(this.box)
-    this.sphereGeometry = new THREE.SphereGeometry(0.5, 16, 16)
-    this.sphere = new THREE.Mesh(this.sphereGeometry, this.material)
-    this.scene.add(this.sphere)
-    this.torusGeometry = new THREE.TorusGeometry(0.5, 0.2, 8, 16)
-    this.torus = new THREE.Mesh(this.torusGeometry, this.material)
-    this.scene.add(this.torus)
-    this.coneGeometry = new THREE.ConeGeometry(0.5, 1.0, 16)
-    this.cone = new THREE.Mesh(this.coneGeometry, this.material)
-    this.scene.add(this.cone)
-
-    // 各種メッシュは少しずつ動かしておく
-    this.box.position.set(-1.0, 1.0, 0.0)
-    this.sphere.position.set(1.0, 1.0, 0.0)
-    this.torus.position.set(-1.0, -1.0, 0.0)
-    this.cone.position.set(1.0, -1.0, 0.0)
+    // 共通のジオメトリ、マテリアルから、複数のメッシュインスタンスを作成する @@@
+    const TORUS_COUNT = 10
+    const TRANSFORM_SCALE = 5.0
+    this.boxArray = []
+    for (let i = 0; i < TORUS_COUNT; ++i) {
+      // トーラスメッシュのインスタンスを生成
+      const box = new THREE.Mesh(this.geometry, this.material)
+      // 座標をランダムに散らす
+      box.position.x = (Math.random() * 2.0 - 1.0) * TRANSFORM_SCALE
+      box.position.y = (Math.random() * 2.0 - 1.0) * TRANSFORM_SCALE
+      box.position.z = (Math.random() * 2.0 - 1.0) * TRANSFORM_SCALE
+      // シーンに追加する
+      this.scene.add(box)
+      // 配列に入れておく
+      this.boxArray.push(box)
+    }
 
     // コントロール
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
@@ -271,12 +258,10 @@ class App3 {
       // three.jsでは、Object3Dという基底クラスがある
       // このクラスに属するインスタンスは皆rotationなどの便利なプロパティを持つ
       // メッシュやカメラは、いずれもObject3Dを継承している
-      this.box.rotation.y += 0.05
-      this.sphere.rotation.y += 0.05
-      this.torus.rotation.y += 0.05
-      this.cone.rotation.y += 0.05
+      this.boxArray.forEach((torus) => {
+        torus.rotation.y += 0.05
+      })
     }
-
     // レンダラーで描画
     // シーンにはBoxジオメトリから作ったメッシュが一つ入っている
     this.renderer.render(this.scene, this.camera)
