@@ -283,6 +283,11 @@ class App3 {
     this.hat4 = new THREE.Mesh(this.boxGeometry, this.nightShadz)
     this.hat5 = new THREE.Mesh(this.boxGeometry, this.claret)
     this.hat6 = new THREE.Mesh(this.boxGeometry, this.nightShadz)
+    this.hat7 = new THREE.Mesh(this.boxGeometry, this.nightShadz)
+    this.hat8 = new THREE.Mesh(this.boxGeometry, this.nightShadz)
+    this.hat9 = new THREE.Mesh(this.boxGeometry, this.nightShadz)
+    this.hat10 = new THREE.Mesh(this.boxGeometry, this.claret)
+    this.hat11 = new THREE.Mesh(this.boxGeometry, this.nightShadz)
 
     this.scene.add(this.hat1)
     this.scene.add(this.hat2)
@@ -290,8 +295,11 @@ class App3 {
     this.scene.add(this.hat4)
     this.scene.add(this.hat5)
     this.scene.add(this.hat6)
-
-    // 位置
+    this.scene.add(this.hat7)
+    this.scene.add(this.hat8)
+    this.scene.add(this.hat9)
+    this.scene.add(this.hat10)
+    this.scene.add(this.hat11)
 
     this.hat1.position.set(0.0, 0.8, 0.0)
     this.hat2.position.set(0.1, 0.8, 0.0)
@@ -299,7 +307,13 @@ class App3 {
     this.hat4.position.set(0.3, 0.8, 0.0)
     this.hat5.position.set(0.4, 0.8, 0.0)
     this.hat6.position.set(0.5, 0.8, 0.0)
+    this.hat7.position.set(-0.1, 0.8, 0.0)
+    this.hat8.position.set(-0.2, 0.8, 0.0)
+    this.hat9.position.set(-0.3, 0.8, 0.0)
+    this.hat10.position.set(-0.4, 0.8, 0.0)
+    this.hat11.position.set(-0.5, 0.8, 0.0)
 
+    // 位置
     this.skinBright1.position.set(-0.1, 0.0, 0.0)
     this.skinBright3.position.set(0.1, 0.0, 0.0)
     this.skinBright4.position.set(0.2, 0.1, 0.0)
